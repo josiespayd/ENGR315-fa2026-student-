@@ -30,7 +30,11 @@ odds_list = []
 """
 Step 1: Write a FOR loop to iterate through the list nums
 """
-
+for val in nums:
+    if val % 2 == 0:
+        evens_list.append(val)
+    else:
+        odds_list.append(val)
 
 """
 Step 2: Inside the FOR loop, examine the contents of nums. If the

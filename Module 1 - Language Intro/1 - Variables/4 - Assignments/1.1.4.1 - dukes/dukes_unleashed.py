@@ -14,6 +14,15 @@ Note: this problem does not require the "compounding interest" formula from the 
 
 ### Your code here ###
 
-in_state_gift = 0
+## Given costs and return rate 
+in_state_cost= 30792
+out_state_cost= 47882
+return_rate= 0.05
 
-out_state_gift = 0
+## Calculate the required gift amounts
+in_state_gift= in_state_cost / return_rate
+out_state_gift= out_state_cost / return_rate
+
+## Print results
+print(in_state_gift)
+print(out_state_gift)

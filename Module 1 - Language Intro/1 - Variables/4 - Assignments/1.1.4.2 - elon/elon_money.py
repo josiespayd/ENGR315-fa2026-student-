@@ -14,9 +14,19 @@ Note that Elon's capital will be $33B.
 
 ### all your code below ###
 
+## Given values
+capital = 33000000000 
 
-# final answer for 10-year
-ten_year_final = None
+## 10-year investment claculation
+rate_10 = 3.96/100
+years_10 = 10
+ten_year_final = capital*((1 + rate_10)**years_10)
 
-# final answer for 20-year
-twenty_year_final = None
+## 20-year investment calculation
+rate_20 = 4.32/100
+years_20 = 20
+twenty_year_final = capital*((1 + rate_20)**years_20)
+
+## Check values
+print(ten_year_final)
+print(twenty_year_final)

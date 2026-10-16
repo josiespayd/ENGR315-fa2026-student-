@@ -68,3 +68,72 @@ def parse_nyt_data(file_path=''):
     return data
 
 ### YOUR CODE HERE ###
+
+## Filter function to analyze the data for a specific county and state
+def analyze_location(data, county_name, state_name):
+    filtered_data = []
+    for entry in data:
+        if entry[1] == county_name and entry[2] == state_name:
+            filtered_data.append(entry)
+
+    if len(filtered_data) == 0:
+        print(f"No data found for {county_name}, {state_name}.")
+        return None
+
+## Finding Dates and cumulative cases for the filtered data
+    dates = []
+    cumulative_cases = []
+    for entry in filtered_data:
+        dates.append(entry[0])
+        cumulative_cases.append(entry[4])
+
+    # Question 1: first date with reported cases
+    first_date = dates[0]
+    for i in range(len(dates)):
+        if cumulative_cases[i] > 0:
+            first_date = dates[i]
+            break
+
+    # Question 2: calculate daily new cases and find the maximum single-day increase
+    daily_new_cases = [0]
+    for i in range(1, len(cumulative_cases)):
+        diff = cumulative_cases[i] - cumulative_cases[i - 1]
+        if diff < 0:
+            diff = 0
+        daily_new_cases.append(diff)
+
+    max_single_day_cases = max(daily_new_cases)
+    max_single_day_date = dates[daily_new_cases.index(max_single_day_cases)]
+
+    # Question 3: find the maximum seven-day total
+    max_seven_day_sum = -1
+    max_seven_day_start_date = ''
+    max_seven_day_end_date = ''
+
+    for i in range(len(daily_new_cases) - 6):
+        seven_day_sum = sum(daily_new_cases[i:i + 7])
+        if seven_day_sum > max_seven_day_sum:
+            max_seven_day_sum = seven_day_sum
+            max_seven_day_start_date = dates[i]
+            max_seven_day_end_date = dates[i + 6]
+
+    # Output the results
+    print("Results for " + county_name + "," + state_name + ":")
+    print("First date with reported cases: " + first_date)
+    print("Maximum single-day new cases: " + str(max_single_day_cases) + " on " + max_single_day_date)
+    print("Maximum seven-day sum: " + str(max_seven_day_sum) + " from " + max_seven_day_start_date + " to " + max_seven_day_end_date)
+    print("Total cumulative cases: " + str(cumulative_cases[-1]))
+    print()
+
+
+if __name__ == "__main__":
+    # File path
+    file_path = "data/covid/us-counties.csv"
+
+    # Dataset
+    data = parse_nyt_data(file_path)
+
+    # Analyze data for a specific county and state
+    analyze_location(data, "Harrisonburg city", "Virginia")
+    analyze_location(data, "Rockingham", "Virginia")
+

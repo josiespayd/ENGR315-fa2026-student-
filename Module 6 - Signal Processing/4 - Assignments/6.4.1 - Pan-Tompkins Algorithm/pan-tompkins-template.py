@@ -1,5 +1,8 @@
+import os
 import numpy as np
+from scipy.signal import butter, filtfilt, find_peaks
 from ekg_testbench import EKGTestBench
+
 
 def detect_heartbeats(filepath):
     """
@@ -15,43 +18,83 @@ def detect_heartbeats(filepath):
     path = filepath
 
     # load data in matrix from CSV file; skip first two rows
-    ## your code here
+    data = np.loadtxt(path, delimiter=',', skiprows=2)
 
     # save each vector as own variable
-    ## your code here
+    time = data[:, 0]
+    ekg = data[:, 1]
 
     # identify one column to process. Call that column signal
 
-    signal = -1 ## your code here
+    signal = ekg.copy()
+    fs = 360  # sampling frequency
+
 
     # pass data through LOW PASS FILTER (OPTIONAL)
-    ## your code here
-
+    low_cutoff = 15
+    b,a= butter(2, low_cutoff, btype='lowpass', fs=fs)
+    b, a = butter(2, low_cutoff, btype='lowpass', fs=fs)
+    low_pass = filtfilt(b, a, signal)
+    low_pass = filtfilt(b, a, signal)
+    
     # pass data through HIGH PASS FILTER (OPTIONAL) to create BAND PASS result
-    ## your code here
+    high_cutoff = 5
+    b, a = butter(2, high_cutoff, btype='highpass', fs=fs)
+    band_pass = filtfilt(b, a, low_pass)
+
 
     # pass data through differentiator
-    ## your code here
+    differentiated = np.gradient(band_pass)
 
     # pass data through square function
-    ## your code here
+    squared = differentiated ** 2
 
     # pass through moving average window
-    ## your code here
+    window_size = int(0.150 * fs)  # 150 ms window
+    window = np.ones(window_size) / window_size
+    averaged = np.convolve(squared, window, mode='same')
 
     # use find_peaks to identify peaks within averaged/filtered data
     # save the peaks result and return as part of testbench result
 
-    ## your code here peaks,_ = find_peaks(....)
+    min_distance = int(0.2 * fs)
 
     beats = None
 
+    threshold = np.mean(averaged) + 0.5 * np.std(averaged)
+
+    peaks, _ = find_peaks(
+        averaged,
+        height=threshold,
+        distance=min_distance,
+        prominence=0.3 * np.std(averaged)
+    )
+
+    # adjust peaks to the actual R-peaks in the EKG signal
+    beats = []
+    search_window = int(0.1 * fs)
+
+    for peak in peaks:
+        start = max(0, peak - search_window)
+        end = min(len(signal), peak + search_window)
+
+        # find the strongest EKG peak near each detection
+        local_signal = np.abs(band_pass[start:end])
+        r_peak = start + np.argmax(local_signal)
+
+        beats.append(r_peak)
+
+    # remove duplicate peaks and sort
+    beats = np.array(sorted(set(beats)), dtype=int)
     # do not modify this line
     return signal, beats
 
 
 # when running this file directly, this will execute first
 if __name__ == "__main__":
+
+        # Run relative paths from the assignment folder
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     # place here so doesn't cause import error
     import matplotlib.pyplot as plt
